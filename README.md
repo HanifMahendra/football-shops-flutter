@@ -274,6 +274,7 @@ Restart aplikasi dari awal dan **reset semua state**.
 **Perbedaan Utama:**
 
 Aspek:
+
 -KECEPATAN-
 Hot Reload: Sangat cepat
 Hot Restart: Sedang
