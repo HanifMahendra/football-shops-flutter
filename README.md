@@ -164,6 +164,8 @@ Berikut adalah semua widget yang saya gunakan beserta fungsinya:
 4. **Best practice** - Standar dalam Flutter development
 5. **MediaQuery & Directionality** - Menyediakan informasi penting tentang device
 
+-- (Pemisah, biar nomornya ga kegabung di github)
+
 4. StatelessWidget vs StatefulWidget
 
 **---StatelessWidget---**
@@ -270,7 +272,8 @@ Restart aplikasi dari awal dan **reset semua state**.
 - Mengubah enum atau class constructor
 
 **Perbedaan Utama:**
-**Aspek:**
+
+Aspek:
 -KECEPATAN-
 Hot Reload: Sangat cepat
 Hot Restart: Sedang
