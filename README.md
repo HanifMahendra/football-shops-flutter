@@ -15,6 +15,8 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+
+-Tugas 7-
 Pertanyaan:
 1. Jelaskan apa itu widget tree pada Flutter dan bagaimana hubungan parent-child (induk-anak) bekerja antar widget.
 2. Sebutkan semua widget yang kamu gunakan dalam proyek ini dan jelaskan fungsinya.
@@ -290,3 +292,498 @@ Hot Restart: Seluruh aplikasi
 -KAPAN-
 Hot Reload: Perubahan UI
 Hot Restart: Perubahan struktur
+
+-Tugas 8-
+
+Pertanyaan:
+1. Jelaskan perbedaan antara Navigator.push() dan Navigator.pushReplacement() pada Flutter. Dalam kasus apa sebaiknya masing-masing digunakan pada aplikasi Football Shop kamu?
+
+2. Bagaimana kamu memanfaatkan hierarchy widget seperti Scaffold, AppBar, dan Drawer untuk membangun struktur halaman yang konsisten di seluruh aplikasi?
+
+3. Dalam konteks desain antarmuka, apa kelebihan menggunakan layout widget seperti Padding, SingleChildScrollView, dan ListView saat menampilkan elemen-elemen form? Berikan contoh penggunaannya dari aplikasi kamu.
+
+4. Bagaimana kamu menyesuaikan warna tema agar aplikasi Football Shop memiliki identitas visual yang konsisten dengan brand toko?
+
+Jawaban:
+1. Navigator.push() vs Navigator.pushReplacement():
+
+Navigator.push() -> Menambahkan halaman baru di atas stack navigasi, halaman sebelumnya tetap ada di memori.
+Contoh:
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => ProductDetailPage()),
+);
+Kapan digunakan:
+- Melihat detail produk dari halaman utama
+- Membuka form tambah produk dari menu
+- Navigasi ke halaman keranjang
+- Semua navigasi yang user perlu kembali ke halaman sebelumnya
+
+Navigator.pushReplacement() -> Mengganti halaman saat ini dengan halaman baru, halaman lama dihapus dari stack.
+Contoh:
+dartNavigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => HomePage()),
+);
+Kapan digunakan:
+- Setelah login berhasil → ke homepage (user tidak perlu kembali ke login)
+- Setelah logout → ke login page (user tidak bisa back ke homepage)
+- Setelah submit form produk → ke halaman daftar produk (menghindari submit ganda)
+- Splash screen → main screen
+
+Contoh kasus konkret:
+ElevatedButton(
+  onPressed: () {
+    if (_formKey.currentState!.validate()) {
+      // Simpan data produk
+      saveProduct();
+      
+      // Gunakan pushReplacement agar user tidak bisa
+      // kembali ke form dan submit lagi
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ProductListPage()),
+      );
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Produk berhasil ditambahkan!')),
+      );
+    }
+  },
+  child: Text('Simpan Produk'),
+)
+
+2. Hierarcy Widget untuk Struktur yang Konsisten:
+(Scaffold - Struktur Dasar Halaman)
+Scaffold menyediakan struktur material design standar:
+
+ProductListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Football Shop'),
+        backgroundColor: Colors.green[800],
+      ),
+      drawer: ShopDrawer(), // Widget drawer yang reusable
+      body: ProductGrid(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AddProductPage()),
+        ),
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+(AppBar - Header Konsisten)
+Membuat AppBar yang seragam di seluruh aplikasi:
+
+class ShopAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  
+  const ShopAppBar({required this.title});
+  
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: Row(
+        children: [
+          Icon(Icons.sports_soccer),
+          SizedBox(width: 8),
+          Text(title),
+        ],
+      ),
+      backgroundColor: Colors.green[800],
+      elevation: 4,
+      actions: [
+        IconButton(
+          icon: Icon(Icons.shopping_cart),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CartPage()),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+
+(Drawer - Menu Navigasi Global)
+Drawer konsisten untuk navigasi antar halaman:
+
+ShopDrawer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.green[800],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.sports_soccer, size: 48, color: Colors.white),
+                SizedBox(height: 8),
+                Text(
+                  'Football Shop',
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
+                Text(
+                  'Your Football Partner',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text('Halaman Utama'),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.shopping_bag),
+            title: Text('Daftar Produk'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProductListPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.add_box),
+            title: Text('Tambah Produk'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddProductPage()),
+              );
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.logout, color: Colors.red),
+            title: Text('Logout', style: TextStyle(color: Colors.red)),
+            onTap: () {
+              // Logout dan kembali ke login
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+3. Kelebihan Layout Widget untuk Form
+(Padding - Jarak dan Ruang - Space between)
+Kelebihan:
+- Memberi ruang antara elemen dengan border
+- Meningkatkan readability
+- Konsistensi spacing
+
+AddProductForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0), // Margin dari edge
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0), // Jarak antar field
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Nama Produk',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Harga',
+                border: OutlineInputBorder(),
+                prefixText: 'Rp ',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+(SingleChildScrollView - Prevent Overflow)
+Kelebihan:
+- Mencegah overflow saat keyboard muncul
+- Form panjang tetap accessible
+- Smooth scrolling experience
+
+ProductFormPage extends StatefulWidget {
+  @override
+  _ProductFormPageState createState() => _ProductFormPageState();
+}
+
+class _ProductFormPageState extends State<ProductFormPage> {
+  final _formKey = GlobalKey<FormState>();
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: ShopAppBar(title: 'Tambah Produk'),
+      body: SingleChildScrollView( // Membuat form bisa di-scroll
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Nama Produk'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Nama produk tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Harga'),
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Deskripsi'),
+                  maxLines: 5,
+                  // Ketika keyboard muncul, SingleChildScrollView
+                  // memastikan field ini tetap bisa diakses
+                ),
+                SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      // Submit form
+                    }
+                  },
+                  child: Text('Simpan'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+(ListView - Daftar Dinamis)
+Kelebihan:
+- Efficient rendering untuk list panjang
+- Built-in scrolling
+- Lazy loading dengan ListView.builder()
+
+ProductListPage extends StatelessWidget {
+  final List<Product> products = getProducts();
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: ShopAppBar(title: 'Daftar Produk'),
+      body: ListView.builder(
+        padding: EdgeInsets.all(8),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return Card(
+            margin: EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.green[800],
+                child: Icon(Icons.sports_soccer, color: Colors.white),
+              ),
+              title: Text(product.name),
+              subtitle: Text('Rp ${product.price.toString()}'),
+              trailing: IconButton(
+                icon: Icon(Icons.arrow_forward),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(product: product),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+4. Kustomisasi Tema untuk Brand Identity
+(Definisi Tema Global)
+MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Football Shop',
+      theme: ThemeData(
+        // Primary color - warna hijau lapangan sepak bola
+        primaryColor: Color(0xFF1B5E20), // Dark green
+        primarySwatch: Colors.green,
+        
+        // Accent color - warna aksen
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Color(0xFF1B5E20),
+          secondary: Color(0xFFFFEB3B), // Kuning seperti kartu kuning
+        ),
+        
+        // AppBar theme
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0xFF1B5E20),
+          foregroundColor: Colors.white,
+          elevation: 4,
+          centerTitle: true,
+        ),
+        
+        // Button theme
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFF1B5E20),
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        
+        // Card theme
+        cardTheme: CardTheme(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: EdgeInsets.all(8),
+        ),
+        
+        // Input decoration theme
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Color(0xFF1B5E20), width: 2),
+          ),
+          labelStyle: TextStyle(color: Color(0xFF1B5E20)),
+        ),
+        
+        // Text theme
+        textTheme: TextTheme(
+          headlineLarge: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1B5E20),
+          ),
+          headlineMedium: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1B5E20),
+          ),
+          bodyLarge: TextStyle(fontSize: 16, color: Colors.black87),
+        ),
+        
+        // Icon theme
+        iconTheme: IconThemeData(color: Color(0xFF1B5E20)),
+      ),
+      home: HomePage(),
+    );
+  }
+}
+
+(Penggunaan Tema di Komponen)
+ProductCard extends StatelessWidget {
+  final Product product;
+  
+  const ProductCard({required this.product});
+  
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      // Otomatis menggunakan CardTheme dari tema global
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailPage(product: product),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.sports_soccer,
+                    size: 64,
+                    color: Theme.of(context).primaryColor, // Menggunakan warna tema
+                  ),
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                product.name,
+                style: Theme.of(context).textTheme.headlineMedium, // Menggunakan text theme
+              ),
+              Text(
+                'Rp ${product.price}',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Manfaat Konsistensi Tema:
+- Brand Recognition - User langsung mengenali aplikasi dari skema warna
+- Maintainability - Ubah satu tempat, semua komponen ikut berubah
+- Professional Look - Tampilan seragam dan polished
+- Development Speed - Tidak perlu set warna manual di setiap widget
+- Dark Mode Ready - Mudah menambahkan darkTheme parameter
