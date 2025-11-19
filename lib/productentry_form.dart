@@ -162,7 +162,7 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: DropdownButtonFormField<String>(
-                  value: _category,
+                  initialValue: _category,
                   decoration: InputDecoration(
                     labelText: "Category",
                     border: OutlineInputBorder(

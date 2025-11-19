@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:football_shops/menu.dart';
 import 'package:football_shops/productentry_form.dart';
+import 'package:football_shops/screens/list_productentry.dart'; // TAMBAHKAN INI
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -50,9 +51,22 @@ class LeftDrawer extends StatelessWidget {
               );
             },
           ),
+          // TAMBAHKAN MENU INI
+          ListTile(
+            leading: const Icon(Icons.shopping_bag),
+            title: const Text('Daftar Product'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProductEntryPage(),
+                ),
+              );
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.add_box),
-            title: const Text('Tambah Produk'),
+            title: const Text('Tambah Product'),
             onTap: () {
               Navigator.pushReplacement(
                 context,

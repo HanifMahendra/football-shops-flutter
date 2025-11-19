@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:football_shops/widgets/left_drawer.dart';
 import 'package:football_shops/productentry_form.dart';
+import 'package:football_shops/screens/list_productentry.dart';
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({super.key});
@@ -132,7 +133,15 @@ class ItemCard extends StatelessWidget {
               SnackBar(content: Text("Kamu telah menekan tombol ${item.name}"))
             );
 
-          if (item.name == "Create Product"){
+          // TAMBAHKAN NAVIGASI INI
+          if (item.name == "All Products") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProductEntryPage(),
+              ),
+            );
+          } else if (item.name == "Create Product") {
             Navigator.push(
               context,
               MaterialPageRoute(
